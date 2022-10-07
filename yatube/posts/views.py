@@ -139,11 +139,11 @@ def profile_follow(request, username):
             'posts:profile',
             username=username
         )
-    following = Follow.objects.filter(
+    follower = Follow.objects.filter(
         user=request.user,
         author=author
     ).exists()
-    if following is True:
+    if follower is True:
         return redirect(
             'posts:profile',
         )
