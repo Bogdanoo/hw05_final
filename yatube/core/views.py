@@ -24,4 +24,8 @@ def permission_denied(request, exception):
 
 
 def server_error(request):
-    return render(request, 'core/500.html', status=HTTPStatus.INTERNAL_SERVER_ERROR)
+    return render(
+        request,
+        'core/500.html',
+        status=HTTPStatus.INTERNAL_SERVER_ERROR
+    )
