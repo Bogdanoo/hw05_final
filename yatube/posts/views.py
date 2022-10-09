@@ -15,7 +15,7 @@ def paginator(request, post_list):
 
 
 def index(request):
-    post_list = Post.objects.all()
+    post_list = Post.objects.select_related('author', 'group')
     pages = paginator(request, post_list)
     context = {
         'page_obj': pages,
@@ -120,7 +120,11 @@ def add_comment(request, post_id):
 @login_required
 def follow_index(request):
     template = 'posts/follow.html'
-    posts = Post.objects.filter(author__following__user=request.user)
+    posts = Post.objects.filter(
+        author__following__user=request.user
+    ).select_related(
+        'author', 'group'
+    )
     pages = Paginator(posts, settings.MAX_PAGE_AMOUNT)
     page_number = request.GET.get('page')
     page_obj = pages.get_page(page_number)
@@ -138,16 +142,10 @@ def profile_follow(request, username):
             'posts:profile',
             username=username
         )
-    follower = Follow.objects.filter(
+    Follow.objects.get_or_create(
         user=request.user,
         author=author
-    ).exists()
-    if follower is True:
-        return redirect(
-            'posts:profile',
-            username=username
-        )
-    Follow.objects.get_or_create(user=request.user, author=author)
+    )
     return redirect(
         'posts:profile',
         username=username
@@ -158,6 +156,5 @@ def profile_follow(request, username):
 def profile_unfollow(request, username):
     author = get_object_or_404(User, username=username)
     is_follower = Follow.objects.filter(user=request.user, author=author)
-    if is_follower.exists():
-        is_follower.delete()
+    is_follower.delete()
     return redirect('posts:profile', username=username)
